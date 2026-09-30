@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cashew Works // Digital Twin</title>
+<style>
+/* ==========================================================================
+   CASHEW WORKS // DIGITAL TWIN — PURE MONOCHROME MINIMAL BRUTALIST HUD
+   Industrial Engineering Workstation Simulation (IE-101)
+   Palette: Pure Black (#000000) / Stark White (#ffffff) / Charcoal (#0a0a0a, #141414)
+   Borders: Crisp 1px (#222222, #ffffff)
+   ========================================================================== */
+
+:root {
+  --bg-app: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-surface-elevated: #141414;
+  --bg-surface-hover: #1a1a1a;
+  
+  --border-subtle: #222222;
+  --border-medium: #333333;
+  --border-strong: #ffffff;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #666666;
+  --text-dim: #444444;
+  
+  --accent: #ffffff;
+  --accent-contrast: #000000;
+  
+  --status-green: #22c55e;
+  --status-amber: #f59e0b;
+  --status-red: #ef4444;
+  
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, select, input {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ==========================================================================
+   FULL VIEWPORT 3D CANVAS STAGE
+   ========================================================================== */
+
+.viewport-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000000;
+  z-index: 1;
+}
+
+#scene {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ==========================================================================
+   MINIMAL FLOATING TOP BAR
+   ========================================================================== */
+
+.top-bar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 42px;
+  background: rgba(10, 10, 10, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.brand-slash {
+  color: var(--text-muted);
+}
+
+.top-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subtle);
+}
+
+/* Active Step Chip */
+.step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.live-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  display: inline-block;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Clean Brutalist Buttons */
+.btn-brutal {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  padding: 5px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-brutal:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-brutal:active {
+  transform: translateY(1px);
+}
+
+.btn-brutal.active,
+.btn-brutal.on {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-brutal-primary {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-brutal-primary:hover {
+  background: #e5e5e5;
+}
+
+/* ==========================================================================
+   MINIMAL FLOATING BOTTOM CONTROL STRIP
+   ========================================================================== */
+
+.bottom-control-strip {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 24px);
+  background: rgba(10, 10, 10, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
+}
+
+/* Top Sub-row: Scrubber & Progress */
+.scrubber-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.scrubber-slider {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-surface-elevated);
+  outline: none;
+  cursor: pointer;
+  accent-color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
+}
+
+.scrubber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 12px;
+  background: #ffffff;
+  border: 1px solid #000000;
+  cursor: pointer;
+}
+
+/* 10 Step Progress Buttons Container */
+.steps-container {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.steps {
+  display: flex;
+  gap: 3px;
+}
+
+.steps button {
+  width: 14px;
+  height: 6px;
+  border: 0;
+  background: var(--border-medium);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.12s ease;
+}
+
+.steps button:hover {
+  background: #ffffff;
+}
+
+.steps button.on {
+  background: #ffffff;
+  height: 8px;
+}
+
+/* Activity Caption in Sub-row */
+.activity-caption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Main Controls Row */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.group-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subtle);
+  margin: 0 4px;
+}
+
+/* Speed Pills */
+.speed-pill {
+  padding: 4px 7px;
+  font-size: 10px;
+}
+
+/* Compact Dock Buttons */
+.dock-btn {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-transform: uppercase;
+}
+
+.dock-btn:hover {
+  color: #ffffff;
+  border-color: var(--border-medium);
+  background: var(--bg-surface-hover);
+}
+
+.dock-btn.on,
+.dock-btn.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   DISCREET STATUS OVERLAY
+   ========================================================================== */
+
+.status-callout {
+  position: fixed;
+  top: 64px;
+  left: 12px;
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  max-width: 290px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.status-callout strong {
+  color: #ffffff;
+  display: block;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.status-callout span {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+/* ==========================================================================
+   SLIDE-OUT STUDY & TELEMETRY DRAWER
+   ========================================================================== */
+
+.study-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 410px;
+  max-width: 92vw;
+  height: 100vh;
+  background: rgba(10, 10, 10, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-left: 1px solid var(--border-subtle);
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 36px rgba(0, 0, 0, 0.85);
+}
+
+.study-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 12px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drawer-close-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-transform: uppercase;
+}
+
+.drawer-close-btn:hover {
+  color: #ffffff;
+  border-color: #ffffff;
+  background: var(--bg-surface-elevated);
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Crisp Brutalist Panels */
+.clean-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
+}
+
+.panel-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.6px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.clean-panel h2 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.clean-panel h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+p {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 10.5px;
+}
+
+/* IE Badges Row */
+.ie-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.badge-brutal {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-surface-elevated);
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-va {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.badge-nva {
+  border-color: #666666;
+  color: #ffffff;
+}
+
+.badge-waste {
+  border-color: #444444;
+  color: var(--text-secondary);
+}
+
+/* Telemetry Readouts */
+.batch-select-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+select {
+  background: var(--bg-surface-elevated);
+  color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  outline: none;
+  max-width: 200px;
+}
+
+select:focus {
+  border-color: #ffffff;
+}
+
+.duration-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 10px;
+}
+
+.duration {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #ffffff;
+  line-height: 1;
+}
+
+.duration small {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.takt-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: #ffffff;
+}
+
+/* Process Bars */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.barrow {
+  display: grid;
+  grid-template-columns: 105px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.bar {
+  height: 5px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: #ffffff;
+  transition: width 0.25s ease;
+}
+
+.barrow.active {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.note {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Collapsible Details */
+details {
+  border: 1px solid var(--border-subtle);
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--bg-surface);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 10px;
+  outline: none;
+}
+
+summary:hover {
+  color: #ffffff;
+}
+
+.ie-params-box {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 8px;
+  margin: 8px 0;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+.ie-param-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  border-bottom: 1px dashed var(--border-subtle);
+}
+
+.ie-param-line:last-child {
+  border-bottom: none;
+}
+
+.ie-param-line strong {
+  color: #ffffff;
+}
+
+/* Material Legend */
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.legend span:before {
+  content: '■';
+  margin-right: 4px;
+  color: var(--c);
+}
+
+/* ==========================================================================
+   FIRST-PERSON WALK MODE OVERLAY
+   ========================================================================== */
+
+.walk-crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 1;
+  color: #ffffff;
+  pointer-events: none;
+  z-index: 200;
+  user-select: none;
+  text-shadow: 0 0 3px #000000;
+}
+
+.walk-prompt {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid #ffffff;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.walk-prompt span {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 0 8px;
+    height: 40px;
+  }
+  .brand-slash, .top-divider {
+    display: none;
+  }
+  .study-drawer {
+    width: 100vw;
+  }
+  .bottom-control-strip {
+    left: 8px;
+    right: 8px;
+    transform: none;
+    max-width: none;
+  }
+  .walk-prompt {
+    font-size: 9.5px;
+    padding: 4px 8px;
+    bottom: 96px;
+  }
+}
+
+/* Pure Simulation / Cinematic Fullscreen Mode (Disable UI) */
+body.pure-view .top-bar,
+body.pure-view .bottom-control-strip,
+body.pure-view .status-callout,
+body.pure-view .study-drawer,
+body.pure-view .walk-prompt,
+body.pure-view #walkCrosshair {
+  display: none !important;
+}
+
+.pure-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(10, 10, 10, 0.92);
+  color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+}
+
+.pure-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+  <!-- 3D VIEWPORT CANVAS -->
+  <div class="viewport-container">
+    <canvas id="scene" aria-label="Interactive 3D cutaway cashew packing factory"></canvas>
+  </div>
+
+  <!-- PURE MODE DISCREET HINT -->
+  <div class="pure-hint" id="pureHint">PURE SIMULATION · PRESS R TO RESTORE UI</div>
+
+  <!-- MINIMAL FLOATING TOP BAR -->
+  <header class="top-bar">
+    <div class="top-left">
+      <div class="brand-title">
+        CASHEW WORKS <span class="brand-slash">//</span> DIGITAL TWIN
+      </div>
+      <div class="top-divider"></div>
+      <div class="step-chip" id="topStepChip">
+        <span class="live-status-dot"></span>
+        <span id="topStepText">[ORIENTATION 1/2] MEET INPUTS</span>
+      </div>
+    </div>
+
+    <div class="top-right">
+      <button class="btn-brutal" id="fullscreenBtn" title="Pure Simulation / Disable UI (R)">
+        <span>⛶ FULLSCREEN</span>
+      </button>
+      <button class="btn-brutal" id="topWalkBtn" title="First-Person Walk Mode">
+        <span>🚶 1ST PERSON / WALK</span>
+      </button>
+      <button class="btn-brutal" id="drawerToggleBtn" title="Toggle IE Study Drawer">
+        <span>☰ IE STUDY DRAWER</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- DISCREET STATUS OVERLAY -->
+  <div class="status-callout" id="status" aria-live="polite">
+    <strong id="statusMain">Three supply routes → one worker</strong>
+    <span id="statusSub">Illustrative cutaway · no dimensions supplied</span>
+  </div>
+
+  <!-- FIRST-PERSON WALK MODE OVERLAYS -->
+  <div class="walk-crosshair" id="walkCrosshair" style="display:none">+</div>
+
+  <!-- MINIMAL FLOATING BOTTOM CONTROL STRIP -->
+  <nav class="bottom-control-strip" aria-label="Simulation Controls">
+    <!-- Sub-row 1: Scrubber & Progress -->
+    <div class="scrubber-row">
+      <input type="range" min="0" max="12000" value="0" id="scrub" class="scrubber-slider" aria-label="12-second stage scrubber">
+      <div class="steps-container">
+        <div class="steps" id="steps"></div>
+      </div>
+      <div class="activity-caption" id="activity">Meet the three supply sources. Not a process step.</div>
+    </div>
+
+    <!-- Sub-row 2: Primary Controls -->
+    <div class="controls-row">
+      <!-- Step Navigation -->
+      <div class="control-group">
+        <button id="prev" class="btn-brutal" title="Previous Step (←)" disabled>◀ PREV</button>
+        <button id="play" class="btn-brutal btn-brutal-primary" title="Play / Pause Tour (T)">▶ PLAY TOUR</button>
+        <button id="next" class="btn-brutal" title="Next Step (→)">NEXT ▶</button>
+      </div>
+
+      <div class="group-divider"></div>
+
+      <!-- Speed Pills -->
+      <div class="control-group">
+        <button class="dock-btn speed-pill" data-speed="0.5">0.5x</button>
+        <button class="dock-btn speed-pill on" data-speed="1.0">1x</button>
+        <button class="dock-btn speed-pill" data-speed="2.0">2x</button>
+      </div>
+
+      <div class="group-divider"></div>
+
+      <!-- Camera Presets -->
+      <div class="control-group">
+        <button id="overview" class="dock-btn on">OVERVIEW</button>
+        <button id="bench" class="dock-btn">BENCH</button>
+        <button id="top" class="dock-btn">TOP</button>
+        <button id="walk" class="dock-btn">WALK</button>
+      </div>
+
+      <div class="group-divider"></div>
+
+      <!-- Display Toggles -->
+      <div class="control-group">
+        <button id="walls" class="dock-btn">WALLS: LOW</button>
+        <button id="flows" class="dock-btn on">FLOWS</button>
+        <button id="labels" class="dock-btn on">SIGNS</button>
+        <button id="markings" class="dock-btn on">MARKINGS</button>
+        <button id="shadows" class="dock-btn on">SHADOWS</button>
+        <button id="motion" class="dock-btn on" title="Stop / Resume Motion (Space)">PAUSE MOTION</button>
+        <button id="shot" class="dock-btn">EXPORT</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- SLIDE-OUT STUDY & TELEMETRY DRAWER -->
+  <aside class="study-drawer" id="studyDrawer" aria-label="IE Study and Telemetry Drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>IE STUDY & TELEMETRY</span>
+      </div>
+      <button class="drawer-close-btn" id="drawerCloseBtn" title="Close Drawer (ESC / Tab)">✕ CLOSE</button>
+    </div>
+
+    <div class="drawer-content">
+      <!-- 1. Process Stepper -->
+      <div class="clean-panel">
+        <div class="panel-header">
+          <div class="panel-title">PROCESS STEPPER</div>
+          <div class="eyebrow" id="stepnum">Orientation · 1 / 2</div>
+        </div>
+
+        <h2 id="title">Meet the three inputs</h2>
+        <p id="explain">This static overview introduces the sources: a tray of roasted cashews, 20 empty pouches delivered by cart, and one folded carton. It is not an activity in the measured cycle. Next shows how the worker checks readiness.</p>
+
+        <button id="replay" class="btn-brutal" style="margin-top:4px">↺ REPLAY THIS STAGE</button>
+        <div id="readiness" style="display:none;margin-top:4px"></div>
+
+        <div class="muted">
+          Animated actions: 12 seconds per stage loop. Actions loop continuously until you advance.
+        </div>
+      </div>
+
+      <!-- 2. Observed Batch Telemetry -->
+      <div class="clean-panel">
+        <div class="panel-header">
+          <div class="panel-title">BATCH TELEMETRY</div>
+          <span class="muted" style="font-family:var(--font-mono);font-size:9px">N = 300 RECORDS</span>
+        </div>
+
+        <div class="batch-select-row">
+          <label for="batch" style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary)">Observed batch:</label>
+          <select id="batch" aria-label="Observed batch"></select>
+        </div>
+
+        <div class="duration-row">
+          <div>
+            <div style="font-size:9px;font-family:var(--font-mono);color:var(--text-muted);text-transform:uppercase;">Cycle Duration</div>
+            <div class="duration" id="duration">25.4 <small>min / cycle</small></div>
+          </div>
+          <div class="takt-badge" id="taktDelta">TAKT: 17.78m</div>
+        </div>
+
+        <div id="arrivals"></div>
+
+        <div class="bars" id="bars"></div>
+
+        <div class="note" id="lesson"></div>
+      </div>
+
+      <!-- 3. Hardware Inspector -->
+      <div class="clean-panel">
+        <div class="panel-header">
+          <div class="panel-title">HARDWARE INSPECTOR</div>
+          <span class="eyebrow" style="font-size:9px">READY</span>
+        </div>
+
+        <h3 id="objectTitle">Explore the factory</h3>
+        <p id="objectText" class="muted">Click the roaster, supply cart, folding table, bench equipment, worker, or storage racks to inspect engineering specifications.</p>
+      </div>
+
+      <!-- 4. Collapsible Assumptions -->
+      <details>
+        <summary>IE-101 Production Parameters</summary>
+        <div style="margin-top:6px;">
+          <p>Source: Homework.pdf, pages 1–3; IE Template.xlsx. All 300 batch records embedded locally.</p>
+          <div class="ie-params-box">
+            <div class="ie-param-line"><span>Target Output:</span><strong>540 packs/day (27 cartons)</strong></div>
+            <div class="ie-param-line"><span>Shift Operating Time:</span><strong>480 minutes / shift</strong></div>
+            <div class="ie-param-line"><span>Required Takt Pace:</span><strong>17.78 minutes / carton</strong></div>
+            <div class="ie-param-line"><span>Observed Mean Cycle:</span><strong>25.44 min (σ = 20.43m)</strong></div>
+            <div class="ie-param-line"><span>Observed Range:</span><strong>13.7 min – 75.0 min</strong></div>
+          </div>
+          <p class="muted">One sequential packing worker is shown; no extra parallel capacity is assumed.</p>
+        </div>
+      </details>
+
+      <!-- 5. Material Legend -->
+      <div class="legend">
+        <span style="--c:#f59e0b">Cashews (3 kg)</span>
+        <span style="--c:#06b6d4">Pouches (20 pcs)</span>
+        <span style="--c:#d97706">Cartons (1 box)</span>
+      </div>
+    </div>
+  </aside>
+
+  <div id="error" style="display:none"></div>
+
+  <!-- UI & TELEMETRY GLUE SCRIPT -->
+  <script>
+    // Pure Monochrome Minimal Brutalist Interface Controller
+    const STEP_NAMES = [
+      'ORIENTATION 1/2 · MEET INPUTS',
+      'ORIENTATION 2/2 · READINESS CHECK',
+      'STEP 1/8 · PREPARE TABLE',
+      'STEP 2/8 · WEIGH CASHEWS',
+      'STEP 3/8 · SEAL POUCHES',
+      'STEP 4/8 · LABEL POUCHES',
+      'STEP 5/8 · CHECK QUALITY',
+      'STEP 6/8 · PACK CARTON',
+      'STEP 7/8 · MOVE TO STORAGE',
+      'STEP 8/8 · CLEAN TABLE'
+    ];
+
+    window.toggleDrawer = function(force) {
+      const drawer = document.getElementById('studyDrawer');
+      const btn = document.getElementById('drawerToggleBtn');
+      if (!drawer) return;
+      const isOpen = force !== undefined ? force : !drawer.classList.contains('open');
+      drawer.classList.toggle('open', isOpen);
+      if (btn) btn.classList.toggle('active', isOpen);
+    };
+
+    window.togglePureSimulation = function(force) {
+      const isPure = force !== undefined ? force : !document.body.classList.contains('pure-view');
+      document.body.classList.toggle('pure-view', isPure);
+      const btn = document.getElementById('fullscreenBtn');
+      if (btn) {
+        btn.classList.toggle('active', isPure);
+        btn.innerHTML = isPure ? '<span>⛶ SHOW UI</span>' : '<span>⛶ FULLSCREEN</span>';
+      }
+      const hint = document.getElementById('pureHint');
+      if (hint) {
+        if (isPure) {
+          hint.classList.add('show');
+          clearTimeout(window._pureHintTimer);
+          window._pureHintTimer = setTimeout(() => {
+            hint.classList.remove('show');
+          }, 2400);
+        } else {
+          hint.classList.remove('show');
+        }
+      }
+      if (window.env && typeof window.env.resize === 'function') {
+        window.env.resize();
+      }
+    };
+    window.toggleFullscreen = window.togglePureSimulation;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fullscreen (Pure view) button
+      const fsBtn = document.getElementById('fullscreenBtn');
+      if (fsBtn) fsBtn.addEventListener('click', () => window.togglePureSimulation());
+
+      // Study Drawer buttons
+      const drawerBtn = document.getElementById('drawerToggleBtn');
+      if (drawerBtn) drawerBtn.addEventListener('click', () => window.toggleDrawer());
+      const closeBtn = document.getElementById('drawerCloseBtn');
+      if (closeBtn) closeBtn.addEventListener('click', () => window.toggleDrawer(false));
+
+      // Speed pills
+      const speedPills = document.querySelectorAll('.speed-pill');
+      speedPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          speedPills.forEach(p => p.classList.remove('on'));
+          pill.classList.add('on');
+          window.simSpeed = parseFloat(pill.dataset.speed) || 1.0;
+        });
+      });
+
+      // Step change hook
+      window.onFactoryStepChange = function(stepIdx) {
+        const topText = document.getElementById('topStepText');
+        if (topText) topText.textContent = STEP_NAMES[stepIdx] || STEP_NAMES[0];
+      };
+
+      // Takt delta observer
+      const durEl = document.getElementById('duration');
+      const deltaEl = document.getElementById('taktDelta');
+      if (durEl && deltaEl) {
+        const updateDelta = () => {
+          const txt = durEl.textContent || '';
+          const m = txt.match(/[\d.]+/);
+          if (!m) return;
+          const val = parseFloat(m[0]);
+          if (txt.includes('this step')) {
+            deltaEl.textContent = 'STEP ' + val.toFixed(1) + 'm';
+          } else {
+            const takt = 17.78;
+            const diff = ((val - takt) / takt) * 100;
+            const sign = diff > 0 ? '+' : '';
+            deltaEl.textContent = `${sign}${diff.toFixed(1)}% TAKT`;
+          }
+        };
+        new MutationObserver(updateDelta).observe(durEl, { childList: true, characterData: true, subtree: true });
+        updateDelta();
+      }
+    });
+  </script>
+
+  <!-- THREE.JS ENGINE & APPLICATION LOGIC -->
+  <script src="three.min.js"></script>
+  <script src="scene_environment.js"></script>
+  <script src="equipment_models.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
